@@ -11,3 +11,8 @@
  ![top commmand snapshot](1.png)
  * I entered a command `firefox & top -n 3` and with this the firefox opened and top started simultaneousely. 
  ![top command when opening browser](2.png)
+ * No noticable change during compilation of a program.
+
+### Question 3
+ * By hit and trial I discovered that `cd`, `help` and other shell commands like `for` and `if` can't be traced.
+ * Bash uses system calls to read inputs and commands. With every key press a READ function reads it. And after hitting Enter the command is tokenized and parsed then gives output accordingly.
