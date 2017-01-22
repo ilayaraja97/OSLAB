@@ -16,3 +16,8 @@
 ### Question 3
  * By hit and trial I discovered that `cd`, `help` and other shell commands like `for` and `if` can't be traced.
  * Bash uses system calls to read inputs and commands. With every key press a READ function reads it. And after hitting Enter the command is tokenized and parsed then gives output accordingly.
+ 
+### ASSgn-0.1-Procfc
+ * Parses `proc` directory's files.
+ * contains information about system stats.
+ * program in `proc_parser.c` object file is `proc_parser.out`
