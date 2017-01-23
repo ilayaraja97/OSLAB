@@ -7,16 +7,28 @@
 
 int executeCommand(char *token[SIZE],int i,char mode)
 {
-	int DONT_WAIT=1;
-	FILE *fin,*fout;
+	int DONT_WAIT=0,PIPE_ON=0;
+	FILE *fin,*fout=fopen("out","w");
+	//printf("%d\n",i);
+	int saved_stdout = dup(STDOUT_FILENO);
+	
 	switch(mode)
 	{
 		case '&':
 			DONT_WAIT=1;
 			break;
+		case '2':
+			PIPE_ON=1;
 		case '|':
 			//freopen("out","w",stdin);
+			dup2(fileno(fout), STDOUT_FILENO);
 			break;
+		case '1':
+			DONT_WAIT=1;
+		case '0':
+			PIPE_ON=1;
+			break;
+			
 	}
 	int pid=fork();
 	if(pid==0)
@@ -44,13 +56,14 @@ int executeCommand(char *token[SIZE],int i,char mode)
 		}
 		else
 			execvp(token[0],token);
+		exit(0);
 	}
 	else
 	{
 		if(strcmp(token[0],"exit")==0)
 		{
 			kill(pid, SIGKILL);
-			printf("rsh closing... have a nice day\n");
+			printf("rsh closing... havde a nice day\n");
 			return 0;
 		}
 		if(!DONT_WAIT)
@@ -63,12 +76,17 @@ int executeCommand(char *token[SIZE],int i,char mode)
 			return 1;
 		}
 	}
+	//printf("adsf\n");
+	dup2(saved_stdout, STDOUT_FILENO);
+	fclose(fout);
+	//printf("adsf\n");
 	return 1;
 }
 
 int main(int argv,char *args[])
 {
 	char buffer[SIZE],*token[SIZE],*file;
+	int PIPE=0;
 	while(1)
 	{
 		printf("user/rsh$ ");
@@ -87,28 +105,52 @@ int main(int argv,char *args[])
 			token[i]=strtok(NULL," ");
 			if(token[i]==NULL)
 			{
-				if(executeCommand(token+j,i,' ')==0)
+				if(PIPE)
+				{
+					if(executeCommand(token+j,i,'0')==0)
+					{
+						return 0;
+					}
+				}
+				else if(executeCommand(token+j,i,' ')==0)
 				{
 					return 0;
 				}
 				j=i+1;
 			}
-			else if(token[i]=="&")
+			else if(strcmp(token[i],"&")==0)
 			{
 				token[i]=NULL;
-				if(executeCommand(token+j,i,'&')==0)
+				if(PIPE)
+				{
+					if(executeCommand(token+j,i,'1')==0)
+					{
+						return 0;
+					}
+				}
+				else if(executeCommand(token+j,i,'&')==0)
 				{
 					return 0;
 				}
+				token[i]="&";
 				j=i+1;
 			}
-			else if(token[i]=="|")
+			else if(strcmp(token[i],"|")==0)
 			{
 				token[i]=NULL;
-				if(executeCommand(token+j,i,'|')==0)
+				if(PIPE)
+				{
+					if(executeCommand(token+j,i,'2')==0)
+					{
+						return 0;
+					}
+				}
+				else if(executeCommand(token+j,i,'|')==0)
 				{
 					return 0;
 				}
+				token[i]="|";
+				PIPE=1;
 				j=i+1;
 			}
 		}while(token[i++]!=NULL);
