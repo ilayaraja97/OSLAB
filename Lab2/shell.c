@@ -3,15 +3,20 @@
 #include<stdio.h>
 #include<string.h>
 #include<sys/wait.h>
+#include<sys/types.h>
 #define SIZE 80
+#define READ_END 0
+#define WRITE_END 1
 
-int executeCommand(char *token[SIZE],int i,char mode)
+int executeCommand(char *token[SIZE],int endOfCommands,char mode)
 {
-	int DONT_WAIT=0,PIPE_ON=0;
+	static char *tokenAux[SIZE];
+	int DONT_WAIT=0,PIPE_ON=0,i=0;
 	FILE *fin,*fout=fopen("out","w");
 	//printf("%d\n",i);
 	int saved_stdout = dup(STDOUT_FILENO);
-	
+	if(token[0]==NULL)
+	return 1;
 	switch(mode)
 	{
 		case '&':
@@ -20,8 +25,11 @@ int executeCommand(char *token[SIZE],int i,char mode)
 		case '2':
 			PIPE_ON=1;
 		case '|':
-			//freopen("out","w",stdin);
-			dup2(fileno(fout), STDOUT_FILENO);
+			do
+			{
+				tokenAux[i]=token[i];
+			}while(token[i++]);
+			return 1;
 			break;
 		case '1':
 			DONT_WAIT=1;
@@ -30,7 +38,7 @@ int executeCommand(char *token[SIZE],int i,char mode)
 			break;
 			
 	}
-	int pid=fork();
+	int pid=fork(),pidAux,fd[2];
 	if(pid==0)
 	{
 		//printf("%s\n",token[0]);
@@ -38,6 +46,61 @@ int executeCommand(char *token[SIZE],int i,char mode)
 		{
 			//printf("rsh closing... have a nice day\n");
 			return 0;
+		}
+		if(PIPE_ON)
+		{
+			pipe(fd);
+			pidAux=fork();
+			if(pidAux==0)
+			{
+				dup2(fd[WRITE_END], STDOUT_FILENO);
+				close(fd[WRITE_END]);
+				if(strcmp(tokenAux[0],"cd")==0)
+				{
+					if(tokenAux[1]!=NULL&&tokenAux[2]==NULL)
+					{
+						if(chdir(tokenAux[1]))
+						{
+							printf("error in changing directory\n");
+						}
+						//return 0;
+					}
+					else
+					{
+						printf("cd <path> is the format\n");
+					}
+				}
+				else
+					if(execvp(tokenAux[0],tokenAux)<0)
+						printf("%s: command not found\n",tokenAux[0]);
+				printf("%c",-1);
+				exit(0);
+			}
+			else
+			{
+				dup2(fd[READ_END], STDIN_FILENO);
+            	close(fd[READ_END]);
+            	waitpid(pidAux,NULL,0);
+            	if(strcmp(token[0],"cd")==0)
+				{
+					if(token[1]!=NULL&&token[2]==NULL)
+					{
+						if(chdir(token[1]))
+						{
+							printf("error in changing directory\n");
+						}
+						//return 0;
+					}
+					else
+					{
+						printf("cd <path> is the format\n");
+					}
+				}
+				else
+					if(execvp(token[0],token)<0)
+						printf("%s: command not found\n",token[0]);
+				exit(0);
+			}
 		}
 		else if(strcmp(token[0],"cd")==0)
 		{
@@ -55,7 +118,8 @@ int executeCommand(char *token[SIZE],int i,char mode)
 			}
 		}
 		else
-			execvp(token[0],token);
+			if(execvp(token[0],token)<0)
+				printf("%s: command not found\n",token[0]);
 		exit(0);
 	}
 	else
