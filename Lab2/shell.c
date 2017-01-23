@@ -38,50 +38,46 @@ int executeCommand(char *token[SIZE],int endOfCommands,char mode)
 			break;
 			
 	}
-	int pid=fork(),pidAux,fd[2];
-	if(pid==0)
+	if(PIPE_ON)
 	{
-		//printf("%s\n",token[0]);
-		if(strcmp(token[0],"exit")==0)
+		int pid,fd[2];
+		pipe(fd);
+		pid=fork();
+		if(pid==0)
 		{
-			//printf("rsh closing... have a nice day\n");
-			return 0;
-		}
-		if(PIPE_ON)
-		{
-			pipe(fd);
-			pidAux=fork();
-			if(pidAux==0)
+		    //printf("i'm the child used for ls \n");
+		    dup2(fd[WRITE_END], STDOUT_FILENO);
+		    close(fd[READ_END]);
+		    if(strcmp(tokenAux[0],"cd")==0)
 			{
-				dup2(fd[WRITE_END], STDOUT_FILENO);
-				close(fd[WRITE_END]);
-				if(strcmp(tokenAux[0],"cd")==0)
+				if(tokenAux[1]!=NULL&&tokenAux[2]==NULL)
 				{
-					if(tokenAux[1]!=NULL&&tokenAux[2]==NULL)
+					if(chdir(tokenAux[1]))
 					{
-						if(chdir(tokenAux[1]))
-						{
-							printf("error in changing directory\n");
-						}
-						//return 0;
+						printf("error in changing directory\n");
 					}
-					else
-					{
-						printf("cd <path> is the format\n");
-					}
+					//return 0;
 				}
 				else
-					if(execvp(tokenAux[0],tokenAux)<0)
-						printf("%s: command not found\n",tokenAux[0]);
-				printf("%c",-1);
-				exit(0);
+				{
+					printf("cd <path> is the format\n");
+				}
 			}
 			else
-			{
-				dup2(fd[READ_END], STDIN_FILENO);
-            	close(fd[READ_END]);
-            	waitpid(pidAux,NULL,0);
-            	if(strcmp(token[0],"cd")==0)
+				if(execvp(tokenAux[0],tokenAux)<0)
+					printf("%s: command not found\n",tokenAux[0]);
+			exit(0);
+		}
+		else
+		{ 
+		    pid=fork();
+
+		    if(pid==0)
+		    {
+		        //printf("i'm in the second child, which will be used to run grep\n");
+		        dup2(fd[READ_END], STDIN_FILENO);
+		        close(fd[WRITE_END]);
+		        if(strcmp(token[0],"cd")==0)
 				{
 					if(token[1]!=NULL&&token[2]==NULL)
 					{
@@ -100,49 +96,81 @@ int executeCommand(char *token[SIZE],int endOfCommands,char mode)
 					if(execvp(token[0],token)<0)
 						printf("%s: command not found\n",token[0]);
 				exit(0);
-			}
-		}
-		else if(strcmp(token[0],"cd")==0)
-		{
-			if(token[1]!=NULL&&token[2]==NULL)
-			{
-				if(chdir(token[1]))
+		    }
+		    else
+		    {
+		    	if(strcmp(token[0],"exit")==0)
 				{
-					printf("error in changing directory\n");
+					kill(pid, SIGKILL);
+					printf("rsh closing... havde a nice day\n");
+					return 0;
 				}
-				//return 0;
-			}
-			else
-			{
-				printf("cd <path> is the format\n");
-			}
+				if(!DONT_WAIT)
+				{
+					wait(NULL);
+					return 1;
+				}
+				else
+				{
+					printf("pid %d running\n",pid);
+					return 1;
+				}
+		    }
 		}
-		else
-			if(execvp(token[0],token)<0)
-				printf("%s: command not found\n",token[0]);
-		exit(0);
 	}
 	else
 	{
-		if(strcmp(token[0],"exit")==0)
+		int pid=fork();
+		if(pid==0)
 		{
-			kill(pid, SIGKILL);
-			printf("rsh closing... havde a nice day\n");
-			return 0;
-		}
-		if(!DONT_WAIT)
-		{
-			waitpid(pid,NULL,0);
+			//printf("%s\n",token[0]);
+			if(strcmp(token[0],"exit")==0)
+			{
+				//printf("rsh closing... have a nice day\n");
+				return 0;
+			}
+			else if(strcmp(token[0],"cd")==0)
+			{
+				if(token[1]!=NULL&&token[2]==NULL)
+				{
+					if(chdir(token[1]))
+					{
+						printf("error in changing directory\n");
+					}
+					//return 0;
+				}
+				else
+				{
+					printf("cd <path> is the format\n");
+				}
+			}
+			else
+				if(execvp(token[0],token)<0)
+					printf("%s: command not found\n",token[0]);
+			exit(0);
 		}
 		else
 		{
-			printf("pid %d running\n",pid);
-			return 1;
+			if(strcmp(token[0],"exit")==0)
+			{
+				kill(pid, SIGKILL);
+				printf("rsh closing... havde a nice day\n");
+				return 0;
+			}
+			if(!DONT_WAIT)
+			{
+				waitpid(pid,NULL,0);
+			}
+			else
+			{
+				printf("pid %d running\n",pid);
+				return 1;
+			}
 		}
 	}
 	//printf("adsf\n");
-	dup2(saved_stdout, STDOUT_FILENO);
-	fclose(fout);
+	//dup2(saved_stdout, STDOUT_FILENO);
+	//fclose(fout);
 	//printf("adsf\n");
 	return 1;
 }
