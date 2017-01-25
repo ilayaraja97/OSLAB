@@ -1,0 +1,4 @@
+a. The root owns the passwd file. The read write permissions are given, the owner name is given.
+   -rwsr-xr-x 1 root root 54256 Mar 29  2016 /usr/bin/passwd is the output.
+b. SUID permission is set ae fourth bit —so the file is executed as 'root'. The file should be opened as root is because only root should be able to modify it. A default use of this can be seen with the /usr/bin/passwd binary file. passwd needs to modify /etc/passwd and /etc/shadow which store account information and password hashes for all users and can only be modified by 'root'.
+

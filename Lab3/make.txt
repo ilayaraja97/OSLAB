@@ -1,0 +1,5 @@
+1. A makefile is a file used to easily build projects. And perform other small routines. A makefile knows which object file is dependent on which source file. Thus when compling the project the files without its respective object file gets built. The dependencies are resolved by giving the dependent filename before the `:` and source after it. 
+2. $< : the name of the related file that caused the action, $@ : is the name of the file to be made , $^ : the name of all dependencies.
+3. the makefiles should have different names like makefile.a, makefile.1, etc. and use it as `make -f makefile.a`.
+4. Made the files makefile, sqrt.c, sqrt.h. The program takes command line arguments.
+
