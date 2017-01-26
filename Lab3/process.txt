@@ -1,8 +1,12 @@
-a. Downloaded `linux-4.9.5` kernel
-b. * `fork.c` is inside `./kernel/fork.c` found using `find -name "fork.c"`
+   * Downloaded `linux-4.9.5` kernel
+a. * `fork.c` is inside `./kernel/fork.c` found using `find -name "fork.c"`
    * `do_fork()` is written in kernel/fork.c found using `grep -r do_fork`
    * only prototype of `sys_fork()` is written in arch/sh/kernel/process_32.c found using `grep -r sys_fork`
    * The story was hard to trace or even strace. All I found was that from fork() it goes to some assembly code found using a tool called cscope. Not getting the definition of sys_fork() made it even difficult. But in older kernel versions sys_fork has its definition in arch/sh/kernel/process_32.c calling do_fork() calling _do_fork().
-c. * Found the definition of the structure `task_struct` in `include/linux/sched.h` at line 1475. Used the command `grep -r "task_struct {"`.
+b. * Found the definition of the structure `task_struct` in `include/linux/sched.h` at line 1475. Used the command `grep -r "task_struct {"`.
    * The structure contains the state of a task usage, has got pointers to itself, wake times, priority of each task, cpus allowed, task state, process credentials, file system info, deadlock detection variables and a thread variable of `struct thread_stuct thread`.
-   
+c. * Command used to list all make files is tree -I "makefile"   
+d. *Location of jiffies: jiffies.c is located at /linux-4.9.5/kernel/time/jiffies.c
+				         jiffies.h is located at /linux-4.9.5/include/linux/jiffies.h
+   *In operating systems, especially Unix, a jiffy is the time between two successive clock ticks. Historically, this has been 10ms. A jiffy in Linux can have various values.
+   *The global variable jiffies holds the number of ticks that have occurred since the system booted.On boot, the kernel initializes the variable to zero, and it is incremented by one during each timer interrupt. Thus, because there are HZ timer interrupts in a second, there are HZ jiffies in a second.The system uptime is therefore jiffies/HZ seconds.
