@@ -212,7 +212,7 @@ int main(int argv,char *args[])
 			}
 			else if(strcmp(token[i],"&")==0)
 			{
-				token[i]=NULL;
+				token[i]=NULL;k
 				if(PIPE)
 				{
 					if(executeCommand(token+j,i,'1')==0)
