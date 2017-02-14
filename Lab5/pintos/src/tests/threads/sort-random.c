@@ -1,8 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <kernel/list.h>
 #include "threads/thread.h"
 #include <random.h>
+#include "devices/timer.h"
 
 //using list.h
 struct ele{
@@ -43,6 +44,7 @@ static void listsort(void * aux UNUSED)
 void test_sort_random(void)
 {
 	thread_create("high",PRI_DEFAULT + 3,listsort,NULL);
+	timer_sleep (100);
 }
 
 
