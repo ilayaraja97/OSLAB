@@ -1,8 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <kernel/list.h>
 #include "threads/thread.h"
 #include <random.h>
+#include "devices/timer.h"
 
 //using list.h
 struct ele{
@@ -18,6 +19,7 @@ static bool value_less (const struct list_elem *a_, const struct list_elem *b_, 
 }
 static void listsort(void * aux UNUSED)
 {
+    printf("asdf");
     thread_set_nice (20);
     struct list list;
     x=(struct ele *)malloc(10*sizeof(struct ele));
@@ -43,6 +45,7 @@ static void listsort(void * aux UNUSED)
 void test_sort_random(void)
 {
     thread_create("high",PRI_DEFAULT + 3,listsort,NULL);
+    thread_yield();
 }
 
 
