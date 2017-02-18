@@ -46,12 +46,13 @@ struct kernel_thread_frame
   };
 
 /* Statistics. */
+long long raja_ticks_counter;
 static long long idle_ticks;    /* # of timer ticks spent idle. */
 static long long kernel_ticks;  /* # of timer ticks in kernel threads. */
 static long long user_ticks;    /* # of timer ticks in user programs. */
 
 /* Scheduling. */
-#define TIME_SLICE 3000         /* # of timer ticks to give each thread. */
+#define TIME_SLICE 10          /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 
 /* If false (default), use round-robin scheduler.
@@ -565,7 +566,10 @@ schedule (void)
   ASSERT (is_thread (next));
 
   if (cur != next)
+  {
+    raja_ticks_counter++;
     prev = switch_threads (cur, next);
+  }
   thread_schedule_tail (prev);
 }
 

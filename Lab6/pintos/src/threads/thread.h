@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+extern long long raja_ticks_counter;
 
 /* States in a thread's life cycle. */
 enum thread_status

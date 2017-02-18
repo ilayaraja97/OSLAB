@@ -40,12 +40,13 @@ static void printPriority(void * aux UNUSED)
 void test_thread(void)
 {
     thread_create("high",PRI_DEFAULT + 11,printName,NULL);
-    thread_create("high",PRI_DEFAULT + 6,printId,NULL);
-    thread_create("high",PRI_DEFAULT + 3,printPriority,NULL);
+    thread_create("sec",PRI_DEFAULT + 6,printId,NULL);
+    thread_create("thir",PRI_DEFAULT + 3,printPriority,NULL);
     int i,j,k;
     for(i=0;i<100;i++)
     {
-        printf("main thread : %d\n",i);
+        printf("main thread (%lld) : %d\n",raja_ticks_counter,i);
+        raja_ticks_counter=0;
         for(k=0;k<loops;k++)
             for(j=0;j<loops;j++);
     }
