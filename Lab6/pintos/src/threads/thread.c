@@ -52,7 +52,7 @@ static long long kernel_ticks;  /* # of timer ticks in kernel threads. */
 static long long user_ticks;    /* # of timer ticks in user programs. */
 
 /* Scheduling. */
-#define TIME_SLICE 10          /* # of timer ticks to give each thread. */
+#define TIME_SLICE 61          /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 
 /* If false (default), use round-robin scheduler.
@@ -144,8 +144,8 @@ thread_tick (void)
 void
 thread_print_stats (void) 
 {
-  printf ("Thread: %lld idle ticks, %lld kernel ticks, %lld user ticks\n",
-          idle_ticks, kernel_ticks, user_ticks);
+  printf ("Thread %s: %lld idle ticks, %lld kernel ticks, %lld user ticks, %d iter\n",
+          thread_name(),idle_ticks, kernel_ticks, user_ticks,(int)raja_ticks_counter/4);
 }
 
 /* Creates a new kernel thread named NAME with the given initial

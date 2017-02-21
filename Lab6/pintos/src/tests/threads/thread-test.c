@@ -7,33 +7,36 @@ void test_thread(void);
 static void printName(void * aux UNUSED)
 {
     int i,j,k;
-    for(i=0;i<100;i++)
+    //for(i=0;i<100;i++)
     {
-        printf("name : %s\n",thread_name());
+        thread_print_stats();
         for(k=0;k<loops;k++)
             for(j=0;j<loops;j++);
+        thread_print_stats();
     }
 }
 
 static void printId(void * aux UNUSED)
 {
     int i,j,k;
-    for(i=0;i<100;i++)
+    //for(i=0;i<100;i++)
     {
-        printf("tid : %d\n",thread_tid());
-        for(k=0;k<loops;k++)
-            for(j=0;j<loops;j++);
+        thread_print_stats();
+        for(k=0;k<loops+5000;k++)
+            for(j=0;j<loops+5000;j++);
+        thread_print_stats();
     }
 }
 
 static void printPriority(void * aux UNUSED)
 {
     int i,j,k;
-    for(i=0;i<100;i++)
+    //for(i=0;i<100;i++)
     {
-        printf("priotiy : %d\n",thread_get_priority());
-        for(k=0;k<loops;k++)
-            for(j=0;j<loops;j++);
+        thread_print_stats();
+        for(k=0;k<loops-5000;k++)
+            for(j=0;j<loops-5000;j++);
+        thread_print_stats();
     }
 }
 
@@ -42,13 +45,15 @@ void test_thread(void)
     thread_create("high",PRI_DEFAULT + 11,printName,NULL);
     thread_create("sec",PRI_DEFAULT + 6,printId,NULL);
     thread_create("thir",PRI_DEFAULT + 3,printPriority,NULL);
+    raja_ticks_counter=0;
     int i,j,k;
-    for(i=0;i<100;i++)
+    //for(i=0;i<100;i++)
     {
         printf("main thread (%lld) : %d\n",raja_ticks_counter,i);
-        raja_ticks_counter=0;
+        thread_print_stats();
         for(k=0;k<loops;k++)
             for(j=0;j<loops;j++);
+        thread_print_stats();
     }
     //timer_sleep (100);
 }
